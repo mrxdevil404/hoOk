@@ -1,4 +1,57 @@
-# hoOk
-Tool for collect subdomains from different websites but the unique in tool collect subdomains from subdomainfinder.c99 and collect all subdomains from rapiddns.io but here collect subdomains from all pages of results
+## Table of Content
+
+- [Description](#description)
+- [Features](#features)
+- [Usage](#usage)
+- [Installation](#installation)
+- [Contact](#contact)
+
+# Description
+
+`hoOk` is a tool for collecting subdomains from different websites like:
+
+- [https://subdomainfinder.c99.nl/](https://subdomainfinder.c99.nl/)
+- [https://rapiddns.io/](https://rapiddns.io/)
+- [https://securitytrails.com/](https://api.securitytrails.com/)
+- [https://crt.sh/](https://crt.sh/)
+
+And more..
+
+But the unique in tool that is collects all subdomains from `rapiddns.io` from all pages of result.
+
+# Features
+
+<h1 align="left">
+  <img src="static/hoOk.png" alt="hoOk" width="700px"></a>
+  <br>
+</h1>
+
+# Usage
+
+```console
+kali@kali:hoOk$ python3 hoOk.py
+Usages:
+
+-t domain to collect subdomains
+
+Example:
+
+1. ./hoOk.py -t hackerone.com # Not https:// or http:// or www.
+
+```
+
+# Installation
+
+```console
+git clone https://github.com/mrxdevil404/hoOk.git
+
+cd ./hoOk
+
+chmod +x hoOk.py
+
+python3 hoOk.py -t target.com
+```
+
+# Contant
 
 Any Explains : Contact Me: https://www.facebook.com/Error404.0040
