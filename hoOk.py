@@ -211,12 +211,14 @@ banner()
 if len(argv) == 1:
     print ('Usages:')
     print ("""
--t domain to collect subdomains
+-t    : domain to collect subdomains
+-f    : input file
+-burp : pass results to burp
 
 Example:
 
-1. ./{0} -t hackerone.com # Not https:// or http:// or www.
-
+1. ./{0} -t hackerone.com -burp # Not https:// or http:// or www.
+2. ./{0} -f domains.txt -burp
 """.format(argv[0]))
 else:
     try:
