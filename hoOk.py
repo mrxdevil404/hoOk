@@ -1,14 +1,17 @@
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 from json import loads , load , dumps
 from subprocess import Popen , PIPE
 from platform import system as iden
+from webbrowser import open as op_w
+from os import system , listdir
 from bs4 import BeautifulSoup
+from os.path import isfile
 from datetime import date
 from colorama import Fore
 from time import strftime
 from random import choice
-from requests import get
-from os.path import isfile
-from os import system
 from sys import argv
 from re import *
 w = Fore.WHITE
@@ -16,13 +19,24 @@ red = Fore.RED
 b = Fore.BLUE
 g = Fore.GREEN
 c = Fore.CYAN
-if iden() != "Windows":
- from readline import parse_and_bind
- parse_and_bind('tab:complete')
+def pass_to_burp():
+
+    proxies = {"http": "http://127.0.0.1:8080", "https": "http://127.0.0.1:8080"}
+    for file_n in listdir():
+        if file_n.endswith(".txt") and file_n != "censys_domains.txt":
+            with open(file_n , 'r')as f:
+                for url in f.readlines():
+                    url = url.rstrip()
+                    if not url.startswith("https://"):
+                        url = "https://" + url
+                    req = requests.get(url ,verify=False , proxies=proxies)
+
 def banner():
+
     if iden() == 'Windows':
         banner_Windows()
     else:system('clear ; python3 banner.py')
+
 def banner_Windows():
     system('cls')
     colors = [w , red , b , g , c]
@@ -33,13 +47,14 @@ def banner_Windows():
                     | |__   ___ | | | | | __
                     | '_ \ / _ \| | | | |/ /
                     | | | | (_) \ \_/ /   < 
-                    |_| |_|\___/ \___/|_|\_\ V 1.0
+                    |_| |_|\___/ \___/|_|\_\ V 1.1
                         
                         Coded BY : Ali Mansour
 
 
     ''')
 def del_repeat( name ):
+
     for name_ in name:
         with open(name_ , 'r')as f:
             data = set(f.readlines())
@@ -47,7 +62,17 @@ def del_repeat( name ):
             for line in data :
                 fx.write(line.rstrip() + '\n')
             fx.close()
+
+def facebook_sub( target ):
+
+    if iden() == 'Windows':
+        op_w(f"https://developers.facebook.com/tools/ct/search?query={target}")
+    else:
+        print (f"{w}[{g}+{w}] Open Link: https://developers.facebook.com/tools/ct/search?query={target}")
+    print (f"{w}[{g}+{w}] Open Link: https://developers.facebook.com/tools/ct/async/\n{w}[{red}+{w}] Add {target} in Subscriptions to Recieve the new subdomains of target")
+
 def sub_collector(target):
+
     doms = open(f"{target}-subdomains.txt" , 'a')
     try:
         print (f'{w}[{red}+{w}] {g}[{strftime("%H:%M:%S")}] {g} Start .')
@@ -56,8 +81,10 @@ def sub_collector(target):
         print (f"{w}[{b}*{w}] {c}securitytrails")
         print (f"{w}[{b}*{w}] {c}hackertarget")
         print (f"{w}[{b}*{w}] {c}rapiddns.io")
-        print (f"{w}[{b}*{w}] {c}virustotal")
+        print (f"{w}[{b}*{w}] {c}whoisxmlapi")
         print (f"{w}[{b}*{w}] {c}riddler.io")
+        print (f"{w}[{b}*{w}] {c}virustotal")
+        print (f"{w}[{b}*{w}] {c}facebook")
         print (f"{w}[{b}*{w}] {c}urlscan")
         print (f"{w}[{b}*{w}] {c}jldc.me")
         print (f"{w}[{b}*{w}] {c}censys")
@@ -69,7 +96,7 @@ def sub_collector(target):
                 if nn != 0:
                     break
                 my_date = date(date.today().year - 1 , month , i)
-                html_doc_1 = get(f"https://subdomainfinder.c99.nl/scans/{my_date}/{target}" ,allow_redirects=True , headers=headers)
+                html_doc_1 = requests.get(f"https://subdomainfinder.c99.nl/scans/{my_date}/{target}" ,allow_redirects=True , headers=headers)
                 if not "Something went wrong while scanning" in html_doc_1.text:
                     soup = BeautifulSoup(html_doc_1.text, 'html.parser')
                     for sub in soup.find_all("a"):
@@ -78,52 +105,57 @@ def sub_collector(target):
                                 print (sub.get("href")[2:])
                                 doms.write(sub.get("href")[2:] + '\n')
                                 nn += 1
-                    print (f"{w}[{b}*{w}] Reference: {html_doc_1.url}")
             if nn != 0:
                 break
+        req = requests.get(f"https://subdomains.whoisxmlapi.com/api/v1?apiKey=at_evqr2BN9pxJgqtXjFXhsrYnvCzcPv&domainName={target}")
+        req_n = loads(req.text)
+        req_m = req_n["result"]["records"]
+        for sea in req_m:
+            print (sea['domain'])
+            doms.write(sea['domain'] + '\n')
         for n in range(1 , 101):
-            html_doc_2 = get(f"https://rapiddns.io/subdomain/{target}?page={str(n)}#result" , allow_redirects=True , headers=headers)
+            html_doc_2 = requests.get(f"https://rapiddns.io/subdomain/{target}?page={str(n)}#result" , allow_redirects=True , headers=headers)
             soup = BeautifulSoup(html_doc_2.text, 'html.parser')
             for sub in soup.find_all("td"):
                 if sub.text.endswith(target):
                     print (sub.text)
                     for sub_ in sub.text.split('\n'):
                      doms.write(sub_ + '\n')
-        req = get(f"https://api.securitytrails.com/v1/domain/{target}/subdomains?apikey=lEDJ6fVras9R8doewLFuJ6WnV0gumSR6").text
+        req = requests.get(f"https://api.securitytrails.com/v1/domain/{target}/subdomains?apikey=lEDJ6fVras9R8doewLFuJ6WnV0gumSR6").text
         for sub in loads(req)["subdomains"]:
             print (sub + '.' + target)
             doms.write(sub + '.' + target + '\n')
-        req = get(f"https://jldc.me/anubis/subdomains/{target}" , headers=headers).text
+        req = requests.get(f"https://jldc.me/anubis/subdomains/{target}" , headers=headers).text
         for sub in loads(req):
             print (sub)
             doms.write(sub + '\n')
         # Developed By Me This Function Coded In AORT Tool from the next code except virustotal depart
-        r = get("https://crt.sh/?q=" + target + "&output=json", timeout=20)
+        r = requests.get("https://crt.sh/?q=" + target + "&output=json", timeout=20)
         f_json = dumps(loads(r.text), indent=4)
         crt_domains = sorted(set(findall(r'"common_name": "(.*?)"', f_json)))
         for dom in crt_domains:
             if dom.endswith(target):
                 print (dom)
                 doms.write(dom + '\n')
-        r = get(f"https://otx.alienvault.com/api/v1/indicators/domain/{target}/passive_dns", timeout=20)
+        r = requests.get(f"https://otx.alienvault.com/api/v1/indicators/domain/{target}/passive_dns", timeout=20)
         alienvault_domains = sorted(set(findall(r'"hostname": "(.*?)"', r.text)))
         for dom in alienvault_domains:
             if dom.endswith(target):
                 print (dom)
                 doms.write(dom + '\n')
-        r = get(f"https://api.hackertarget.com/hostsearch/?q={target}", timeout=20)
+        r = requests.get(f"https://api.hackertarget.com/hostsearch/?q={target}", timeout=20)
         hackertarget_domains = findall(r'(.*?),', r.text)
         for dom in hackertarget_domains:
             if dom.endswith(target):
                 print (dom)
                 doms.write(dom + '\n')
-        r = get(f"https://riddler.io/search/exportcsv?q=pld:{target}", timeout=20)
+        r = requests.get(f"https://riddler.io/search/exportcsv?q=pld:{target}", timeout=20)
         riddler_domains = findall(r'\[.*?\]",.*?,(.*?),\[', r.text)
         for dom in riddler_domains:
             if dom.endswith(target):
                 print (dom)
                 doms.write(dom + '\n')
-        r = get(f"https://urlscan.io/api/v1/search/?q={target}", timeout=20)
+        r = requests.get(f"https://urlscan.io/api/v1/search/?q={target}", timeout=20)
         urlscan_domains = sorted(set(findall(r'https://(.*?).' + target, r.text)))
         for dom in urlscan_domains:
             dom = dom + "." + target
@@ -137,7 +169,7 @@ def sub_collector(target):
         url = 'https://www.virustotal.com/vtapi/v2/domain/report'
         params = {'apikey':apikey,'domain':target}
         try:
-            response = get(url, params=params)
+            response = requests.get(url, params=params)
             jdata = response.json()
             domains = sorted(jdata['subdomains'])
             for i in domains:
@@ -150,24 +182,31 @@ def sub_collector(target):
             exit("No domains found for %s" % target)
         except(ConnectionError):
             exit("Could not connect to www.virtustotal.com")
-        with open("censys_domains.txt" , 'w')as ffc:ffc.write(Popen(f'censys subdomains {target}', shell=True, stdout=PIPE ).communicate()[0].decode())
+        with open("censys_domains.txt" , 'a')as ffc:ffc.write(Popen(f'censys subdomains {target}', shell=True, stdout=PIPE ).communicate()[0].decode())
         doms.close()
         del_repeat([f"{target}-subdomains.txt"])
         fxx = open(f"{target}-subdomains.txt" , 'r')
         print (f'{w}[{b}*{w}]{w} Success Collect {str(len(fxx.readlines()))} Subdomains in {target}-subdomains.txt')
         fxx.close()
+        print (f"{w}[{b}*{w}] Reference: {html_doc_1.url}")
+        facebook_sub( target )
         print (f'{w}[{g}*{w}] Done .')
     except KeyboardInterrupt :
         exit()
     except Exception as e:
         print (e)
         doms.close()
-        with open("censys_domains.txt" , 'w')as ffc:ffc.write(Popen(f'censys subdomains {target}', shell=True, stdout=PIPE ).communicate()[0].decode())
+        with open("censys_domains.txt" , 'a')as ffc:ffc.write(Popen(f'censys subdomains {target}', shell=True, stdout=PIPE ).communicate()[0].decode())
         del_repeat([f"{target}-subdomains.txt"])
         fxx = open(f"{target}-subdomains.txt" , 'r')
         print (f'{w}[{b}*{w}]{w} Success Collect {str(len(fxx.readlines()))} Subdomains in {target}-subdomains.txt')
         fxx.close()
+        print (f"{w}[{b}*{w}] Reference: {html_doc_1.url}")
+        facebook_sub( target )
         print (f'{w}[{g}*{w}] Done .')
+        if "-burp" in argv[1:] and "-f" not in argv[1:]:
+            print (f"{w}[{g}+{w}] Pass Results to burp")
+            pass_to_burp()
 banner()
 if len(argv) == 1:
     print ('Usages:')
@@ -183,8 +222,25 @@ else:
     try:
         if "-t" in argv[1:]:
             target = argv[argv.index('-t')+1]
-        if "-t" not in argv[1:]:
-            exit(f"{w}[{red}!{w}] Target Not Inserted")
-        sub_collector(target)
+        if "-f" in argv[1:]:
+            name_f = argv[argv.index('-f')+1]
+            if isfile(name_f):
+                with open(name_f , 'r')as f:
+                    for new_target in f.readlines():
+                        new_target = new_target.rstrip()
+                        if new_target.startswith("https://"):
+                            new_target = new_target.replace("https://" , '')
+                        if new_target.startswith("http://"):
+                            new_target = new_target.replace("http://" , '')
+                        if new_target.startswith("www."):
+                            new_target = new_target.replace("www." , '')
+                        sub_collector( new_target )
+                if  "-burp" in argv[1:]:
+                    print (f"{w}[{g}+{w}] Pass Results to burp")
+                    pass_to_burp()
+            else:
+                exit(f"{w}[{red}!{w}] File Not Found")
+        if "-f" not in argv[1:]:
+            sub_collector(target)
     except Exception as e:
         print (e)
