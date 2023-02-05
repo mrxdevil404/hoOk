@@ -89,6 +89,8 @@ def sub_collector(target):
         print (f"{w}[{b}*{w}] {c}jldc.me")
         print (f"{w}[{b}*{w}] {c}censys")
         print (f"{w}[{b}*{w}] {c}crt.sh{w}")
+        if not isfile("whoisxmlapi.txt"):
+            print(f"{w}[{red}!{w}] add api_key of https://subdomains.whoisxmlapi.com to collect from whoisxmlapi")
         nn = 0
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0"}
         for month in range(6 , 13):
@@ -107,20 +109,26 @@ def sub_collector(target):
                                 nn += 1
             if nn != 0:
                 break
-        req = requests.get(f"https://subdomains.whoisxmlapi.com/api/v1?apiKey=at_evqr2BN9pxJgqtXjFXhsrYnvCzcPv&domainName={target}")
-        req_n = loads(req.text)
-        req_m = req_n["result"]["records"]
-        for sea in req_m:
-            print (sea['domain'])
-            doms.write(sea['domain'] + '\n')
-        for n in range(1 , 101):
-            html_doc_2 = requests.get(f"https://rapiddns.io/subdomain/{target}?page={str(n)}#result" , allow_redirects=True , headers=headers)
-            soup = BeautifulSoup(html_doc_2.text, 'html.parser')
-            for sub in soup.find_all("td"):
-                if sub.text.endswith(target):
-                    print (sub.text)
-                    for sub_ in sub.text.split('\n'):
-                     doms.write(sub_ + '\n')
+        if isfile("whoisxmlapi.txt"):
+            try:
+                api_key = open("whoisxmlapi.txt" , 'r').readlines()
+                req = requests.get(f"https://subdomains.whoisxmlapi.com/api/v1?apiKey={choice(api_key)}&domainName={target}")
+                req_n = loads(req.text)
+                req_m = req_n["result"]["records"]
+                for sea in req_m:
+                    print (sea['domain'])
+                    doms.write(sea['domain'] + '\n')
+                for n in range(1 , 101):
+                    html_doc_2 = requests.get(f"https://rapiddns.io/subdomain/{target}?page={str(n)}#result" , allow_redirects=True , headers=headers)
+                    soup = BeautifulSoup(html_doc_2.text, 'html.parser')
+                    for sub in soup.find_all("td"):
+                        if sub.text.endswith(target):
+                            print (sub.text)
+                            for sub_ in sub.text.split('\n'):
+                                doms.write(sub_ + '\n')
+            except Exception as e:
+                print (e)
+                print (f"{red} api_key is no longer valid")
         req = requests.get(f"https://api.securitytrails.com/v1/domain/{target}/subdomains?apikey=lEDJ6fVras9R8doewLFuJ6WnV0gumSR6").text
         for sub in loads(req)["subdomains"]:
             print (sub + '.' + target)
