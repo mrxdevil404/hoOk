@@ -19,6 +19,8 @@ And more..
 
 But the unique in tool that is collects all subdomains from `rapiddns.io` from all pages of result.
 
+Note: whoisxmlapi is limit usage for api so please create more than account and add their apis in whoisxmlapi.txt at the same path of script to make script use one of them every time .
+
 # Features
 
 <h1 align="left">
